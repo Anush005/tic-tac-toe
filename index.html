@@ -1,91 +1,131 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Tic Tac Toe AI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic Tac Toe AI - Meme Edition</title>
 
 <style>
 body {
-  font-family: Arial;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   text-align: center;
-  background: linear-gradient(135deg, #74ebd5, #ACB6E5); /* fresh gradient */
+  background: linear-gradient(135deg, #74ebd5, #ACB6E5);
   min-height: 100vh;
+  margin: 0;
+  padding: 10px; /* প্যাডিং কিছুটা কমানো হয়েছে মোবাইল ফ্রেন্ডলি করার জন্য */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 h1 {
-  margin-top: 30px;
+  margin-top: 20px;
   color: #2c3e50;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  font-size: 1.8rem;
 }
 
 p {
-  font-size: 18px;
+  font-size: 16px;
   color: #2c3e50;
+  font-weight: bold;
 }
 
+/* বোর্ডকে রেসপনসিভ করা হয়েছে */
 #board {
   display: grid;
-  grid-template-columns: repeat(3, 120px);
+  /* মোবাইলে স্ক্রিনের ৯০% জায়গা নেবে কিন্তু সর্বোচ্চ ৩৫০ পিক্সেল পর্যন্ত বড় হবে */
+  grid-template-columns: repeat(3, minmax(80px, 110px)); 
   grid-gap: 10px;
   justify-content: center;
-  margin-top: 30px;
+  margin: 20px auto;
+  max-width: 95vw; 
 }
 
 .cell {
-  width: 120px;
-  height: 120px;
-  font-size: 40px;
+  /* সেলগুলোর সাইজ এখন অটোমেটিক অ্যাডজাস্ট হবে */
+  aspect-ratio: 1 / 1; 
+  width: 100%;
+  font-size: 2.5rem;
+  font-weight: bold;
   background: #ffffff;
-  border: 2px solid #2c3e50;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   cursor: pointer;
-  transition: transform 0.3s ease, background 0.3s ease;
-  color: #2c3e50; /* default text color */
+  transition: all 0.2s ease;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell:hover {
+  background: #f8f9fa;
+  transform: translateY(-2px);
 }
 
 .cell.played {
-  transform: scale(1.1);
-  background: #d1f2eb;
+  transform: scale(0.95);
+  background: #ecf0f1;
 }
 
 .cell.winner {
-  background: #f1c40f;
-  animation: blink 0.8s infinite alternate;
+  background: #f1c40f !important;
+  color: white;
+  animation: blink 0.5s infinite alternate;
 }
 
 @keyframes blink {
-  from { background: #f1c40f; }
-  to { background: #f39c12; }
+  from { transform: scale(0.95); }
+  to { transform: scale(1.05); }
+}
+
+.controls {
+  margin-top: 15px;
+  width: 100%;
 }
 
 button, select {
-  margin-top: 20px;
-  padding: 10px 20px;
+  padding: 12px 20px;
   font-size: 16px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   background: #2c3e50;
   color: #ffffff;
   cursor: pointer;
+  transition: background 0.3s;
+  margin: 5px;
 }
 
-button:hover, select:hover {
+button:hover {
   background: #34495e;
 }
 
 select {
-  margin-left: 10px;
-  font-size: 16px;
-  padding: 5px 10px;
   background: #ffffff;
   color: #2c3e50;
   border: 2px solid #2c3e50;
 }
 
-/* 🎨 Special colors for X and O */
-.cell.x {
-  color: #2980b9; /* Blue for X */
+.cell.x { color: #2980b9; }
+.cell.o { color: #e74c3c; }
+
+#status {
+  height: 40px;
+  margin: 15px 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
 }
 
-.cell.o {
-  color: #e74c3c; /* Red for O */
+/* ছোট ফোনের জন্য বিশেষ অ্যাডজাস্টমেন্ট */
+@media (max-width: 360px) {
+  #board {
+    grid-gap: 6px;
+  }
+  .cell {
+    font-size: 2rem;
+  }
 }
 </style>
 </head>
@@ -94,22 +134,22 @@ select {
 <h1>Tic Tac Toe AI</h1>
 <p>You = X | AI = O</p>
 
-<!-- 🎮 Mode Selector -->
-<label for="mode">Choose Difficulty: </label>
-<select id="mode" onchange="restart()">
-  <option value="easy">Easy</option>
-  <option value="medium">Medium</option>
-  <option value="impossible" selected>Impossible</option>
-</select>
+<div class="controls">
+  <label for="mode">Difficulty: </label>
+  <select id="mode" onchange="restart()">
+    <option value="easy">Easy</option>
+    <option value="medium">Medium</option>
+    <option value="impossible" selected>Impossible</option>
+  </select>
+</div>
 
 <div id="board"></div>
 <h2 id="status"></h2>
 <button onclick="restart()">Restart Game</button>
 
-<!-- 🎵 Sound Effects -->
-<audio id="winSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-<audio id="loseSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
-<audio id="drawSound" src="https://actions.google.com/sounds/v1/cartoon/slide_whistle.ogg"></audio>
+<audio id="winSound" src="maa ke ladle meme.mp3"></audio> 
+<audio id="loseSound" src="Dramatic fart.mp3"></audio> 
+<audio id="drawSound" src="Fahh.mp3"></audio> 
 
 <script>
 let board = ["","","","","","","","",""];
@@ -132,30 +172,42 @@ function createBoard(){
   }
 }
 
+function playSound(id) {
+  const sound = document.getElementById(id);
+  if(sound) {
+    sound.currentTime = 0; 
+    sound.play().catch(e => console.log("Audio play failed, user interaction needed."));
+  }
+}
+
 function humanMove(index){
   if(board[index]!=="" || gameOver) return;
+  
   board[index]="X";
   updateBoard();
-  document.querySelectorAll(".cell")[index].classList.add("played");
-
+  
   let winCombo = checkWinner(board,"X");
   if(winCombo){
-    status.innerText="You Win!";
+    status.innerText="You Win! 🎉";
     highlightWinner(winCombo);
-    document.getElementById("winSound").play();
+    playSound("winSound");
     gameOver=true;
     return;
   }
+  
   if(isDraw()){
-    status.innerText="Draw!";
-    document.getElementById("drawSound").play();
+    status.innerText="It's a Draw! 😐";
+    playSound("drawSound");
     gameOver=true;
     return;
   }
-  aiMove();
+  
+  setTimeout(aiMove, 400);
 }
 
 function aiMove(){
+  if(gameOver) return;
+
   let mode = modeSelect.value;
   let move;
 
@@ -163,33 +215,33 @@ function aiMove(){
     let empty = board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
     move = empty[Math.floor(Math.random()*empty.length)];
   } else if(mode==="medium"){
-    if(Math.random()<0.5){
-      let empty = board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
-      move = empty[Math.floor(Math.random()*empty.length)];
-    } else {
-      move = bestMove();
-    }
+    move = Math.random() < 0.5 ? bestMove() : randomMove();
   } else {
     move = bestMove();
   }
 
   board[move]="O";
   updateBoard();
-  document.querySelectorAll(".cell")[move].classList.add("played");
 
   let winCombo = checkWinner(board,"O");
   if(winCombo){
-    status.innerText="AI Wins!";
+    status.innerText="AI Wins! 💨";
     highlightWinner(winCombo);
-    document.getElementById("loseSound").play();
+    playSound("loseSound");
     gameOver=true;
     return;
   }
+  
   if(isDraw()){
-    status.innerText="Draw!";
-    document.getElementById("drawSound").play();
+    status.innerText="It's a Draw! 😐";
+    playSound("drawSound");
     gameOver=true;
   }
+}
+
+function randomMove() {
+  let empty = board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+  return empty[Math.floor(Math.random()*empty.length)];
 }
 
 function bestMove(){
@@ -210,8 +262,8 @@ function bestMove(){
 }
 
 function minimax(board,depth,isMax,alpha,beta){
-  if(checkWinner(board,"O")) return 1;
-  if(checkWinner(board,"X")) return -1;
+  if(checkWinner(board,"O")) return 10 - depth;
+  if(checkWinner(board,"X")) return depth - 10;
   if(isDraw()) return 0;
 
   if(isMax){
@@ -258,8 +310,9 @@ function checkWinner(board,player){
 }
 
 function highlightWinner(combo){
+  const cells = document.querySelectorAll(".cell");
   combo.forEach(i=>{
-    document.querySelectorAll(".cell")[i].classList.add("winner");
+    cells[i].classList.add("winner");
   });
 }
 
@@ -269,6 +322,10 @@ function isDraw(){
 
 function updateBoard(){
   createBoard();
+  // Played ক্লাস অ্যাড করার লজিক একটু সিম্পলিফাই করা হয়েছে
+  board.forEach((val, i) => {
+    if(val !== "") document.querySelectorAll(".cell")[i].classList.add("played");
+  });
 }
 
 function restart(){
